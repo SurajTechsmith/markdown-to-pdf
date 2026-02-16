@@ -92,7 +92,7 @@ pandoc input.md -o output.pdf --pdf-engine=xelatex -V geometry:margin=1in
 * Add verbose/debug mode
 * Add unit tests for argument parsing
 
-### v2.0 – Desktop Application (Fyne)
+### v2.0 – Desktop Application
 
 Convert this CLI tool into a cross-platform desktop application using Fyne:
 
@@ -118,3 +118,4 @@ Convert this CLI tool into a cross-platform desktop application using Fyne:
 
 Suraj Yadav
 Learning Go by building real tools 🚀
+
