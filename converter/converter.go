@@ -2,7 +2,6 @@ package converter
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -19,20 +18,12 @@ func Convert(inputPath string, outputPath string) error {
 		return fmt.Errorf("File does not exist")
 
 	}
-	cmd := exec.Command(
-		"pandoc",
-		inputPath,
-		"-o",
-		outputPath,
-		"--pdf-engine=xelatex",
-		"-V", "geometry:margin=1in",
-	)
 
-	output, err := cmd.CombinedOutput()
+	cmd := exec.Command("pandoc", inputPath, "-o", outputPath, " --pdf-engine=xelatex", "-V geometry:margin=0.7in")
+
+	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Pandoc error:")
-		fmt.Println(string(output))
-		log.Fatal(err)
+		return fmt.Errorf("failed to run pandoc: %w", err)
 	}
 
 	return nil
