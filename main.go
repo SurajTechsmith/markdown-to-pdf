@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"md_to_pdf/converter"
 	"os"
+	"time"
 )
 
 func main() {
-
+	start := time.Now()
 	input := flag.String("in", "", "Path to input file")
 	output := flag.String("out", "", "Path to output pdf file (optional)")
 
@@ -24,6 +25,6 @@ func main() {
 		fmt.Println("Error: ", err)
 		os.Exit(1)
 	}
-
-	fmt.Println("PDF created successfully hurray")
+	end := time.Since(start)
+	fmt.Println("PDF created successfully hurray : ", end)
 }
