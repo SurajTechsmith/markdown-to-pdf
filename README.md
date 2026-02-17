@@ -4,7 +4,7 @@ A minimal CLI tool that converts Markdown files to PDF using Pandoc and XeLaTeX.
 
 > Built while learning Go — focused on real-world tooling and understanding how things work under the hood.
 
----
+
 
 ## Requirements
 
@@ -13,7 +13,7 @@ A minimal CLI tool that converts Markdown files to PDF using Pandoc and XeLaTeX.
 - LaTeX distribution (MiKTeX or TeX Live) with XeLaTeX
 - A Unicode font (recommended: Noto Sans)
 
----
+
 
 ## Usage
 
@@ -31,7 +31,7 @@ Internally runs:
 pandoc input.md -o output.pdf --pdf-engine=xelatex -V geometry:margin=1in
 ```
 
----
+
 
 ## What I learned
 
@@ -40,7 +40,6 @@ pandoc input.md -o output.pdf --pdf-engine=xelatex -V geometry:margin=1in
 - Unicode and font handling in XeLaTeX
 - Structuring a small but complete CLI tool
 
----
 
 ## Roadmap
 
@@ -54,8 +53,9 @@ pandoc input.md -o output.pdf --pdf-engine=xelatex -V geometry:margin=1in
 - Output location selector
 - Progress feedback and status log
 
----
+
 
 ## Author
+
 
 Suraj — learning Go by building real tools.
