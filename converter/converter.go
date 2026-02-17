@@ -20,7 +20,7 @@ func Convert(inputPath string, outputPath string) error {
 
 	}
 
-	cmd := exec.Command("pandoc", inputPath, "-o", outputPath, "--pdf-engine=xelatex", "-V geometry:margin=0.7in")
+	cmd := exec.Command("pandoc", inputPath, "-o", outputPath, "--pdf-engine=xelatex", "-V geometry:margin=0.5in")
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
