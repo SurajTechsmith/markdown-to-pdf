@@ -1,0 +1,13 @@
+# build
+build/
+
+# frontend build
+frontend/dist/
+frontend/node_modules/
+
+# binaries
+*.exe
+*.dll
+
+# pandoc binaries
+converter/pandoc-bin/

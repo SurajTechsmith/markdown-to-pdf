@@ -1,94 +1,36 @@
 package main
 
 import (
-	"fmt"
-	"md_to_pdf/converter"
+	"embed"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/storage"
-	"fyne.io/fyne/v2/widget"
-
-	"os"
-	"path/filepath"
-	"time"
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
 
+//go:embed all:frontend/dist
+var assets embed.FS
+
 func main() {
-	a := app.New()
-	w := a.NewWindow("Markdown to PDF")
+	// Create an instance of the app structure
+	app := NewApp()
 
-	var inputPath string
-	var outputPath string
-
-	inputLabel := widget.NewLabel("No file selected")
-	outputLabel := widget.NewLabel("No output selected")
-	exePath, _ := os.Executable()
-	exeDir := filepath.Dir(exePath)
-	selectInput := widget.NewButton("Select Markdown", func() {
-		d := dialog.NewFileOpen(func(file fyne.URIReadCloser, err error) {
-			if err != nil || file == nil {
-				return
-			}
-			inputPath = file.URI().Path()
-			inputLabel.SetText(inputPath)
-		}, w)
-		uri, err := storage.ListerForURI(storage.NewFileURI(exeDir))
-		if err == nil {
-			d.SetLocation(uri)
-		}
-
-		d.Show()
+	// Create application with options
+	err := wails.Run(&options.App{
+		Title:  "markdown2pdf",
+		Width:  1024,
+		Height: 768,
+		AssetServer: &assetserver.Options{
+			Assets: assets,
+		},
+		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		OnStartup:        app.startup,
+		Bind: []interface{}{
+			app,
+		},
 	})
 
-	selectOutput := widget.NewButton("Select Output Location", func() {
-		dialog.NewFileSave(func(file fyne.URIWriteCloser, err error) {
-			if err != nil || file == nil {
-				return
-			}
-			outputPath = file.URI().Path()
-			outputLabel.SetText(outputPath)
-		}, w).Show()
-	})
-
-	convertBtn := widget.NewButton("Convert", func() {
-		if inputPath == "" || outputPath == "" {
-			dialog.ShowInformation("Error", "Please select input and output", w)
-			return
-		}
-
-		if filepath.Ext(outputPath) != ".pdf" {
-			outputPath += ".pdf"
-		}
-
-		start := time.Now()
-
-		err := converter.Convert(inputPath, outputPath)
-		if err != nil {
-			dialog.ShowError(err, w)
-			return
-		}
-
-		elapsed := time.Since(start)
-
-		dialog.ShowInformation(
-			"Success",
-			fmt.Sprintf("PDF created successfully!\nTime taken: %v", elapsed),
-			w,
-		)
-	})
-
-	content := container.NewVBox(
-		selectInput,
-		inputLabel,
-		selectOutput,
-		outputLabel,
-		convertBtn,
-	)
-
-	w.SetContent(content)
-	w.Resize(fyne.NewSize(600, 500))
-	w.ShowAndRun()
+	if err != nil {
+		println("Error:", err.Error())
+	}
 }
