@@ -1,6 +1,3 @@
-Here’s a clean, professional, and well-structured **README.md** file tailored for your Wails-based Markdown-to-PDF desktop app. You can copy-paste it directly into your project root as `README.md`.
-
-```markdown
 # Markdown2PDF
 
 A simple, lightweight desktop application that converts Markdown files to beautiful PDFs.
