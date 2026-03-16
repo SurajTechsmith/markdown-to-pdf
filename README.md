@@ -19,7 +19,6 @@ Built with **Go** + **Wails** (Go backend + modern web frontend) for cross-platf
 ## Screenshots
 
 ![screenshot](image.png)
-
 ## Tech Stack
 
 - **Frontend**: React (or Vanilla JS/TS) + Tailwind / plain CSS
