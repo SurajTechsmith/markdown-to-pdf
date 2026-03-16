@@ -70,8 +70,6 @@ The built executable will be in `build/bin/`.
 
 ```
 markdown2pdf/
-├── build/                  # Wails build artifacts + appicon.png
-│   └── appicon.png
 ├── frontend/               # React / HTML / JS frontend
 │   ├── src/
 │   └── dist/               # built frontend assets

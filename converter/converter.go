@@ -112,7 +112,6 @@ func Convert(inputPath, outputPath string) (time.Duration, error) {
 		inputPath,
 		"-o", outputPath,
 		"--pdf-engine=xelatex",
-		"--toc",
 		"-V", "geometry:margin=1in",
 	)
 
