@@ -24,8 +24,8 @@ function truncatePath(p) {
 
 function parseError(err) {
   if (typeof err !== "string") return "Conversion failed ✗"
-  if (err.includes("xelatex") || err.includes("pdf-engine")) return "Missing PDF engine (xelatex) ✗"
-  if (err.includes("pandoc")) return "Pandoc error — check terminal ✗"
+  if (err.includes("xelatex") || err.includes("pdf-engine")) return `Missing PDF engine (xelatex) ✗ ${err}`
+  if (err.includes("pandoc")) return `string ${err}`
   return "Conversion failed ✗"
 }
 
@@ -93,7 +93,7 @@ export default function App() {
 
         <div className="card-header">
           <div className="logo">
-            <span className="logo-title">Pandoc</span>
+            <span className="logo-title">Pandoc + wkhtmltopdf</span>
             <span className="logo-badge">MD → PDF</span>
           </div>
           <div className="subtitle">Document Converter</div>

@@ -13,9 +13,15 @@ import (
 )
 
 //go:embed pandoc-bin/windows/pandoc.exe
-//go:embed pandoc-bin/darwin/pandoc
 //go:embed pandoc-bin/linux/pandoc
 var pandocBin embed.FS
+
+//go:embed pandoc-bin/windows/wkhtmltox/bin/wkhtmltopdf.exe
+//go:embed pandoc-bin/linux/usr/local/bin/wkhtmltopdf
+var wkhtmltopdf embed.FS
+
+//go:embed pandoc-bin/style.css
+var styleBin embed.FS
 
 var (
 	pandocPath string
@@ -23,6 +29,96 @@ var (
 	pandocErr  error
 )
 
+var (
+	wkhtmltopdfPath string
+	wkhtmltopdfOnce sync.Once
+	wkhtmltopdfErr  error
+)
+var (
+	cssPath string
+	cssOnce sync.Once
+	cssErr  error
+)
+
+func getCSSPath() (string, error) {
+	cssOnce.Do(func() {
+		data, err := styleBin.ReadFile("pandoc-bin/style.css")
+		if err != nil {
+			cssErr = fmt.Errorf("embedded css not found: %w", err)
+			return
+		}
+
+		tmpDir, err := os.MkdirTemp("", "css-wails-*")
+		if err != nil {
+			cssErr = fmt.Errorf("cannot create temp dir: %w", err)
+			return
+		}
+
+		targetPath := filepath.Join(tmpDir, "style.css")
+		if err := os.WriteFile(targetPath, data, 0o644); err != nil {
+			cssErr = fmt.Errorf("cannot write css: %w", err)
+			return
+		}
+
+		cssPath = targetPath
+	})
+
+	return cssPath, cssErr
+}
+
+func getWkhtmltopdfPath() (string, error) {
+	wkhtmltopdfOnce.Do(func() {
+
+		tmpDir, err := os.MkdirTemp("", "wkhtmltopdf-wails-*")
+		if err != nil {
+
+			wkhtmltopdfErr = fmt.Errorf("cannot create temp directory for wkhtmltopdf: %w", err)
+			return
+		}
+
+		var embeddedFile, targetFile string
+
+		switch runtime.GOOS {
+		case "windows":
+			embeddedFile = "pandoc-bin/windows/wkhtmltox/bin/wkhtmltopdf.exe"
+			targetFile = "wkhtmltopdf.exe"
+		case "linux":
+			embeddedFile = "pandoc-bin/linux/usr/local/bin/wkhtmltopdf"
+			targetFile = "wkhtmltopdf"
+		default:
+
+			wkhtmltopdfErr = fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+			return
+		}
+
+		data, err := wkhtmltopdf.ReadFile(embeddedFile)
+		if err != nil {
+			wkhtmltopdfErr = fmt.Errorf("embedded wkhtmltopdf not found (%s): %w", embeddedFile, err)
+			return
+		}
+
+		targetPath := filepath.Join(tmpDir, targetFile)
+		if err := os.WriteFile(targetPath, data, 0o755); err != nil {
+			wkhtmltopdfErr = fmt.Errorf("cannot write wkhtmltopdf to temp: %w", err)
+			return
+		}
+
+		if runtime.GOOS != "windows" {
+			if err := os.Chmod(targetPath, 0o755); err != nil {
+				wkhtmltopdfErr = fmt.Errorf("cannot make wkhtmltopdf executable: %w", err)
+				return
+			}
+		}
+
+		wkhtmltopdfPath = targetPath
+	})
+
+	if wkhtmltopdfErr != nil {
+		return "", wkhtmltopdfErr
+	}
+
+	return wkhtmltopdfPath, nil
+}
 func getPandocPath() (string, error) {
 	pandocOnce.Do(func() {
 		tmpDir, err := os.MkdirTemp("", "pandoc-wails-*")
@@ -83,6 +179,15 @@ func Convert(inputPath, outputPath string) (time.Duration, error) {
 		return 0, fmt.Errorf("pandoc setup failed: %w", err)
 	}
 
+	wkhtmltopdfBinPath, err := getWkhtmltopdfPath()
+	if err != nil {
+		return 0, fmt.Errorf("wkhtmltopdf error: %w", err)
+	}
+	cssFilePath, err := getCSSPath()
+	if err != nil {
+		return 0, fmt.Errorf("css error: %w", err)
+	}
+
 	if outputPath == "" {
 		ext := filepath.Ext(inputPath)
 		outputPath = strings.TrimSuffix(inputPath, ext) + ".pdf"
@@ -107,13 +212,21 @@ func Convert(inputPath, outputPath string) (time.Duration, error) {
 	}
 
 	start := time.Now()
-
-	cmd := exec.Command(pandocBinPath,
+	cmd := exec.Command(
+		pandocBinPath,
 		inputPath,
 		"-o", outputPath,
-		"--pdf-engine=xelatex",
-		"-V", "geometry:margin=1in",
+		"--pdf-engine="+wkhtmltopdfBinPath,
+		"--css="+cssFilePath,
+		"--pdf-engine-opt=--enable-local-file-access",
+		"--self-contained",
+		"--pdf-engine-opt=--margin-top", "--pdf-engine-opt=0.5in",
+		"--pdf-engine-opt=--margin-bottom", "--pdf-engine-opt=0.5in",
+		"--pdf-engine-opt=--margin-left", "--pdf-engine-opt=0.5in",
+		"--pdf-engine-opt=--margin-right", "--pdf-engine-opt=0.5in",
 	)
+
+	cmd.SysProcAttr = getSysAttr()
 
 	output, err := cmd.CombinedOutput()
 	elapsed := time.Since(start)
