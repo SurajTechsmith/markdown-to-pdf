@@ -211,6 +211,10 @@ func Convert(inputPath, outputPath string) (time.Duration, error) {
 		return 0, fmt.Errorf("cannot create output directory: %w", err)
 	}
 
+	inputPath = filepath.Clean(inputPath)
+	outputPath = filepath.Clean(outputPath)
+	originalDir := filepath.Dir(inputPath)
+
 	start := time.Now()
 	cmd := exec.Command(
 		pandocBinPath,
@@ -218,12 +222,13 @@ func Convert(inputPath, outputPath string) (time.Duration, error) {
 		"-o", outputPath,
 		"--pdf-engine="+wkhtmltopdfBinPath,
 		"--css="+cssFilePath,
+		"--resource-path="+originalDir,
 		"--pdf-engine-opt=--enable-local-file-access",
-		"--self-contained",
-		"--pdf-engine-opt=--margin-top", "--pdf-engine-opt=0.5in",
-		"--pdf-engine-opt=--margin-bottom", "--pdf-engine-opt=0.5in",
-		"--pdf-engine-opt=--margin-left", "--pdf-engine-opt=0.5in",
-		"--pdf-engine-opt=--margin-right", "--pdf-engine-opt=0.5in",
+
+		"--pdf-engine-opt=--margin-top", "--pdf-engine-opt=12.7mm",
+		"--pdf-engine-opt=--margin-bottom", "--pdf-engine-opt=12.7mm",
+		"--pdf-engine-opt=--margin-left", "--pdf-engine-opt=12.7mm",
+		"--pdf-engine-opt=--margin-right", "--pdf-engine-opt=12.7mm",
 	)
 
 	cmd.SysProcAttr = getSysAttr()
