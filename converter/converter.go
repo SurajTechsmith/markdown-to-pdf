@@ -213,24 +213,32 @@ func Convert(inputPath, outputPath string) (time.Duration, error) {
 
 	inputPath = filepath.Clean(inputPath)
 	outputPath = filepath.Clean(outputPath)
-	originalDir := filepath.Dir(inputPath)
 
 	start := time.Now()
+
 	cmd := exec.Command(
 		pandocBinPath,
 		inputPath,
 		"-o", outputPath,
-		"--pdf-engine="+wkhtmltopdfBinPath,
-		"--css="+cssFilePath,
-		"--resource-path="+originalDir,
+		"--standalone",
+
+		"--to", "html5",
+
+		"--css", cssFilePath,
+
+		"--pdf-engine", wkhtmltopdfBinPath,
+
 		"--pdf-engine-opt=--enable-local-file-access",
 
-		"--pdf-engine-opt=--margin-top", "--pdf-engine-opt=12.7mm",
-		"--pdf-engine-opt=--margin-bottom", "--pdf-engine-opt=12.7mm",
-		"--pdf-engine-opt=--margin-left", "--pdf-engine-opt=12.7mm",
-		"--pdf-engine-opt=--margin-right", "--pdf-engine-opt=12.7mm",
+		"--pdf-engine-opt=--margin-top", "--pdf-engine-opt", "20mm",
+		"--pdf-engine-opt=--margin-bottom", "--pdf-engine-opt", "20mm",
+		"--pdf-engine-opt=--margin-left", "--pdf-engine-opt", "20mm",
+		"--pdf-engine-opt=--margin-right", "--pdf-engine-opt", "20mm",
+
+		"--pdf-engine-opt=--page-size", "--pdf-engine-opt", "A4",
 	)
 
+	cmd.Dir = filepath.Dir(inputPath)
 	cmd.SysProcAttr = getSysAttr()
 
 	output, err := cmd.CombinedOutput()
