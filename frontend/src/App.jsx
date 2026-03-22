@@ -24,7 +24,7 @@ function truncatePath(p) {
 
 function parseError(err) {
   if (typeof err !== "string") return "Conversion failed ✗"
-  if (err.includes("xelatex") || err.includes("pdf-engine")) return `Missing PDF engine (xelatex) ✗ ${err}`
+  if (err.includes("pdf-engine")) return `Error: ✗ ${err}`
   if (err.includes("pandoc")) return `string ${err}`
   return "Conversion failed ✗"
 }
