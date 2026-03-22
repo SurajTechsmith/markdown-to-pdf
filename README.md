@@ -2,7 +2,7 @@
 
 A simple, lightweight desktop application that converts Markdown files to beautiful PDFs.
 
-Built with **Go** + **Wails** (Go backend + modern web frontend) for cross-platform support (Windows, macOS, Linux).
+Built with **Go** + **Wails** (Go backend + modern web frontend) for cross-platform support (Windows, Linux).
 
 ![screenshot](image-1.png)
 
